@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FileText, Pill, Calendar, Activity, ChevronRight, Loader2, Download, Utensils } from 'lucide-react';
+import { FileText, Pill, Calendar, Activity, ChevronRight, Loader2, Download, Utensils, Dumbbell } from 'lucide-react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -41,7 +41,7 @@ const HistoryPage = () => {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-5 md:p-6 max-w-6xl mx-auto mb-20 md:mb-0">
       
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
@@ -76,6 +76,13 @@ const HistoryPage = () => {
             Diet Plans
             {activeTab === 'diets' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600"></span>}
         </button>
+        <button 
+          onClick={() => setActiveTab('workouts')}
+          className={`pb-3 px-4 font-medium transition-colors relative ${activeTab === 'workouts' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+      >
+          Workout Plans
+          {activeTab === 'workouts' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600"></span>}
+      </button>
       </div>
 
       {/* Content */}
@@ -163,6 +170,27 @@ const HistoryPage = () => {
                     ))
                 ) : <div className="text-center py-12 text-gray-400">No diet plans found.</div>
             )}
+
+            {/* WORKOUTS LIST */}
+      {activeTab === 'workouts' && (
+          data.workouts?.length > 0 ? (
+              data.workouts.map((item) => (
+                  <div key={item._id} onClick={() => navigate(`/history/workout/${item._id}`)} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex justify-between items-center group cursor-pointer">
+                      <div className="flex items-start gap-4">
+                          <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shrink-0"><Dumbbell size={20} /></div>
+                          <div>
+                              <h3 className="font-bold text-slate-800 text-lg capitalize">{item.goal} Routine</h3>
+                              <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
+                                  <span className="flex items-center gap-1"><Calendar size={14} /> {formatDate(item.createdAt)}</span>
+                                  <span className="bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full text-xs font-bold">{item.frequency}</span>
+                              </div>
+                          </div>
+                      </div>
+                      <ChevronRight className="text-gray-300 group-hover:text-blue-600 transition-colors" />
+                  </div>
+              ))
+          ) : <div className="text-center py-12 text-gray-400">No workout plans found.</div>
+      )}
 
         </div>
       )}

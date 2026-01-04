@@ -52,7 +52,7 @@ function MedicineInfo() {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto h-full overflow-y-auto">
+    <div className="p-6 md:p-6 max-w-5xl mx-auto h-full overflow-y-auto">
       
       {/* Header */}
       <div className="mb-8 text-center">
@@ -66,7 +66,7 @@ function MedicineInfo() {
       </div>
 
       {/* Search Bar */}
-      <div className="max-w-2xl mx-auto flex gap-3 mb-10">
+      <div className="max-w-2xl mx-auto flex flex-col md:flex-row gap-3 mb-10 md:mb-10 relative">
         <input 
           type="text" 
           placeholder="Enter medicine name (e.g., Ganaton Total, Dolo 650)..."
@@ -78,7 +78,7 @@ function MedicineInfo() {
         <button 
           onClick={handleSearch}
           disabled={loading || !query.trim()}
-          className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center gap-2 shadow-lg shadow-blue-200"
+          className="justify-center bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center gap-2 shadow-lg shadow-blue-200"
         >
           {loading ? <Loader2 className="animate-spin" /> : <Search />}
           Search

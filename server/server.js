@@ -17,6 +17,13 @@ import historyRoute from './routes/historyRoute.js'
 // importing diet route for to show the diet plans
 import dietRoute from './routes/dietRoute.js'
 
+// importing workout route
+import workoutRoute from './routes/workoutRoute.js'
+
+import dashboardRoute from './routes/dashboardRoute.js'
+
+import appointmentRoute from './routes/appointmentRoute.js'
+
 dotenv.config()
 
 // 2. Connect to Database
@@ -55,6 +62,12 @@ app.use('/api/chat', chatRoute)
 app.use('/api/history', historyRoute)
 
 app.use('/api/diet', dietRoute)
+
+app.use('/api/workout', workoutRoute)
+
+app.use('/api/dashboard', dashboardRoute)
+
+app.use('/api/appointments', appointmentRoute)
 
 // Basic Test Route
 // Logic: A simple check to ensure the server is alive before we add complex AI logic.

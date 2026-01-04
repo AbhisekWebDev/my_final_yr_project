@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Calendar, Activity, Pill, Loader2, Utensils, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Calendar, Activity, Pill, Loader2, Utensils, AlertTriangle, Dumbbell } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -73,7 +73,12 @@ const HistoryDetail = () => {
       Icon = Utensils;
       colorClass = "bg-green-100 text-green-600";
       markdownContent = data.aiPlan; // <--- DIETS USE 'aiPlan'
-  }
+  } else if (type === 'workout') {
+    title = `${data.goal} Routine`;
+    Icon = Dumbbell;
+    colorClass = "bg-purple-100 text-purple-600";
+    markdownContent = data.aiPlan;
+}
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -100,6 +105,12 @@ const HistoryDetail = () => {
                           <AlertTriangle size={12} /> Allergies: {data.allergies}
                       </span>
                   )}
+
+                  {type === 'workout' && data.frequency && (
+    <span className="bg-purple-50 text-purple-600 px-2.5 py-0.5 rounded-full text-sm font-bold flex items-center gap-1">
+        Target: {data.frequency}
+    </span>
+)}
 
                   {/* Show Confidence or Rx Status */}
                   {data.confidenceScore && (

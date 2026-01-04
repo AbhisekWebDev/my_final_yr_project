@@ -1,20 +1,22 @@
 import SymptomLog from "../models/SymptomLog.js"
 import MedicineLog from "../models/MedicineLog.js"
 import DietLog from "../models/DietLog.js"
+import WorkoutLog from "../models/WorkoutLog.js"
 
 // @desc    Get User Medical History
 // @route   GET /api/history
 // @access  Private
 const getHistory = async (req, res) => {
     try {
-        // Fetch both logs in parallel, sorted by newest first
-        const [symptoms, medicines, diets] = await Promise.all([
+        // Fetch logs in parallel, sorted by newest first
+        const [symptoms, medicines, diets, workouts] = await Promise.all([
             SymptomLog.find({ user: req.user._id }).sort({ createdAt: -1 }),
             MedicineLog.find({ user: req.user._id }).sort({ createdAt: -1 }),
-            DietLog.find({ user: req.user._id }).sort({ createdAt: -1 })
+            DietLog.find({ user: req.user._id }).sort({ createdAt: -1 }),
+            WorkoutLog.find({ user: req.user._id }).sort({ createdAt: -1 })
         ]);
 
-        res.json({ symptoms, medicines, diets })
+        res.json({ symptoms, medicines, diets, workouts })
     } catch (error) {
         console.error("History Fetch Error:", error)
         res.status(500).json({ message: "Server Error" })
@@ -30,11 +32,13 @@ const getHistoryDetails = async (req, res) => {
         let data;
 
         if (type === 'symptom') {
-            data = await SymptomLog.findOne({ _id: id, user: req.user._id });
+            data = await SymptomLog.findOne({ _id: id, user: req.user._id })
         } else if (type === 'medicine') {
-            data = await MedicineLog.findOne({ _id: id, user: req.user._id });
+            data = await MedicineLog.findOne({ _id: id, user: req.user._id })
         } else if (type === 'diet') {
-            data = await DietLog.findOne({ _id: id, user: req.user._id });
+            data = await DietLog.findOne({ _id: id, user: req.user._id })
+        } else if (type === 'workout') {
+            data = await WorkoutLog.findOne({ _id: id, user: req.user._id })
         }
 
         if (!data) {

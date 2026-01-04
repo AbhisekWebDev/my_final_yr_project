@@ -1,8 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-
-import { Pill } from 'lucide-react'
+import axios from 'axios'
 
 import MedicineInfo from './MedicineInfo'
 
@@ -17,7 +16,9 @@ import {
     User,
     Activity,
     History,
-    Utensils
+    Utensils,
+    Dumbbell,
+    Pill
 } from 'lucide-react'
 
 import ChatInterface from './ChatInterface'
@@ -50,6 +51,29 @@ function Dashboard() {
         navigate('/login')
     }
 
+    
+    const [stats, setStats] = useState({ appointments: 0, reports: 0, score: '--' });
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+                const config = { headers: { Authorization: `Bearer ${userInfo?.token}` } };
+                
+                const { data } = await axios.get('http://localhost:5000/api/dashboard/stats', config);
+                
+                setStats({
+                    appointments: data.appointments,
+                    reports: data.pendingReports,
+                    score: data.healthScore
+                });
+            } catch (error) {
+                console.error("Error fetching stats", error);
+            }
+        };
+
+        if(user) fetchStats();
+    }, [user])
+
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
       
@@ -61,10 +85,10 @@ function Dashboard() {
       />
 
       <aside 
-        className={`fixed md:static inset-y-0 left-0 z-30 w-64 bg-slate-900 text-white transform transition-transform duration-200 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 flex flex-col`}
+        className={`fixed md:static inset-y-0 left-0 z-30 w-64 bg-slate-900 text-white transform transition-transform duration-200 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 flex flex-col h-screen`}
       >
         {/* Sidebar Header */}
-        <div className="p-6 flex items-center justify-between">
+        <div className="p-6 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg">
               <Activity className="text-white w-6 h-6" strokeWidth={3} />
@@ -78,11 +102,21 @@ function Dashboard() {
           </button>
         </div>
 
+        <style>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+
         {/* Navigation Links */}
-        <nav className="flex-1 px-4 space-y-2 mt-4">
+        <nav className="flex-1 px-4 space-y-2 mt-4 overflow-y-auto no-scrollbar">
           <SidebarItem icon={<LayoutDashboard size={20} />} text="Overview" active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} />
           <SidebarItem icon={<MessageSquare size={20} />} text="AI Chat Assistant" active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} />
-          <SidebarItem icon={<FileText size={20} />} text="Report Analysis" />
+          <SidebarItem icon={<FileText size={20} />} text="Report Download" />
           <SidebarItem icon={<Settings size={20} />} text="Settings" />
           <Link to="/medicines" className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-all font-medium">
           <Pill size={20} />
@@ -93,15 +127,20 @@ function Dashboard() {
           <Utensils size={20} />
           <span>Diet Planner</span>
           </Link>
+
+          <Link to="/workout" className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-all font-medium">
+          <Dumbbell size={20} />
+          <span>Workout Planner</span>
+          </Link>
           
           <Link to="/history" className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-all font-medium">
           <History size={20} />
-          <span>Medical History</span>
+          <span>History</span>
           </Link>
         </nav>
 
         {/* User Profile & Logout */}
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-slate-800 shrink-0 bg-slate-900">
           <div className="flex items-center gap-3 mb-4 px-2">
             <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
               <User size={20} />
@@ -145,13 +184,16 @@ function Dashboard() {
 
             {/* Stats Grid */}
             <div className="grid md:grid-cols-3 gap-6 mb-8">
-              <StatCard title="Upcoming Appointments" value="0" color="blue" />
-              <StatCard title="Pending Reports" value="0" color="yellow" />
-              <StatCard title="Health Score" value="--" color="green" />
+            <div onClick={() => navigate('/appointments')} className="cursor-pointer transition-transform hover:scale-[1.02]">
+    <StatCard title="Upcoming Appointments" value={stats.appointments} color="blue" />
+</div>
+              {/* <StatCard title="Upcoming Appointments" value={stats.appointments} color="blue" /> */}
+              <StatCard title="Pending Reports" value={stats.reports} color="yellow" />
+              <StatCard title="Health Score" value={stats.score} color="green" />
             </div>
 
             {/* Placeholder for AI Feature */}
-            <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm text-center py-16">
+            <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm text-center py-10 mb-8">
               <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageSquare size={32} />
               </div>

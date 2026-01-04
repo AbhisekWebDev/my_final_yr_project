@@ -9,6 +9,8 @@ import MedicineInfo from './components/MedicineInfo'
 import HistoryPage from './components/HistoryPage'
 import HistoryDetails from './components/HistoryDetails'
 import DietPlanner from './components/DietPlanner'
+import WorkoutPlanner from './components/WorkoutPlanner'
+import AppointmentPage from './components/AppointmentPage'
 
 import { Routes, Route } from 'react-router-dom'
 
@@ -36,6 +38,10 @@ function App() {
       <Route path="/history/:type/:id" element={<HistoryDetails />} />
 
       <Route path="/diet" element={<DietPlanner />} />
+
+      <Route path="/workout" element={<WorkoutPlanner />} />
+
+      <Route path="/appointments" element={<AppointmentPage />} />
     
     </Routes>
   )
