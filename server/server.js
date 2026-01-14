@@ -24,6 +24,8 @@ import dashboardRoute from './routes/dashboardRoute.js'
 
 import appointmentRoute from './routes/appointmentRoute.js'
 
+import healthRoute from './routes/healthRoute.js'
+
 dotenv.config()
 
 // 2. Connect to Database
@@ -68,6 +70,8 @@ app.use('/api/workout', workoutRoute)
 app.use('/api/dashboard', dashboardRoute)
 
 app.use('/api/appointments', appointmentRoute)
+
+app.use('/api/health', healthRoute)
 
 // Basic Test Route
 // Logic: A simple check to ensure the server is alive before we add complex AI logic.

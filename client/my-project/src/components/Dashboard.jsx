@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom'
 import axios from 'axios'
 
 import MedicineInfo from './MedicineInfo'
+import HealthDashboard from './HealthDashboard'
+import ReportAnalyzer from './ReportAnalyzer'
 
 import {
     LayoutDashboard,
@@ -18,7 +20,9 @@ import {
     History,
     Utensils,
     Dumbbell,
-    Pill
+    Pill,
+    HeartPulse,
+    FileSearch
 } from 'lucide-react'
 
 import ChatInterface from './ChatInterface'
@@ -118,6 +122,15 @@ function Dashboard() {
           <SidebarItem icon={<MessageSquare size={20} />} text="AI Chat Assistant" active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} />
           <SidebarItem icon={<FileText size={20} />} text="Report Download" />
           <SidebarItem icon={<Settings size={20} />} text="Settings" />
+
+          {/* --- 2. New Health Stats Tab --- */}
+          <SidebarItem 
+            icon={<HeartPulse size={20} />} 
+            text="Health Stats" 
+            active={activeTab === 'health'} 
+            onClick={() => setActiveTab('health')} 
+          />
+
           <Link to="/medicines" className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-all font-medium">
           <Pill size={20} />
           <span>Medicine Scanner</span>
@@ -131,6 +144,14 @@ function Dashboard() {
           <Link to="/workout" className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-all font-medium">
           <Dumbbell size={20} />
           <span>Workout Planner</span>
+          </Link>
+
+          <Link 
+            to="/report-analyzer" 
+            className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-all font-medium"
+          >
+             <FileSearch size={20} /> 
+             <span>Report Analyzer</span>
           </Link>
           
           <Link to="/history" className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-all font-medium">
@@ -209,6 +230,14 @@ function Dashboard() {
             </div>
             </>
             )}
+
+            {/* VIEW: HEALTH DASHBOARD */}
+            {activeTab === 'health' && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-full">
+                 <HealthDashboard />
+              </div>
+            )}
+
             {activeTab === 'chat' && (
               <div className="h-full pb-4">
                  <ChatInterface />

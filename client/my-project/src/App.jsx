@@ -11,6 +11,7 @@ import HistoryDetails from './components/HistoryDetails'
 import DietPlanner from './components/DietPlanner'
 import WorkoutPlanner from './components/WorkoutPlanner'
 import AppointmentPage from './components/AppointmentPage'
+import ReportAnalyzer from './components/ReportAnalyzer'
 
 import { Routes, Route } from 'react-router-dom'
 
@@ -42,6 +43,8 @@ function App() {
       <Route path="/workout" element={<WorkoutPlanner />} />
 
       <Route path="/appointments" element={<AppointmentPage />} />
+
+      <Route path="/report-analyzer" element={<ReportAnalyzer />} />
     
     </Routes>
   )

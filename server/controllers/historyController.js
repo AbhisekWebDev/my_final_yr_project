@@ -3,20 +3,23 @@ import MedicineLog from "../models/MedicineLog.js"
 import DietLog from "../models/DietLog.js"
 import WorkoutLog from "../models/WorkoutLog.js"
 
+import ReportLog from "../models/ReportLog.js"
+
 // @desc    Get User Medical History
 // @route   GET /api/history
 // @access  Private
 const getHistory = async (req, res) => {
     try {
         // Fetch logs in parallel, sorted by newest first
-        const [symptoms, medicines, diets, workouts] = await Promise.all([
+        const [symptoms, medicines, diets, workouts, reports] = await Promise.all([
             SymptomLog.find({ user: req.user._id }).sort({ createdAt: -1 }),
             MedicineLog.find({ user: req.user._id }).sort({ createdAt: -1 }),
             DietLog.find({ user: req.user._id }).sort({ createdAt: -1 }),
-            WorkoutLog.find({ user: req.user._id }).sort({ createdAt: -1 })
+            WorkoutLog.find({ user: req.user._id }).sort({ createdAt: -1 }),
+            ReportLog.find({ user: req.user._id }).sort({ createdAt: -1 })
         ]);
 
-        res.json({ symptoms, medicines, diets, workouts })
+        res.json({ symptoms, medicines, diets, workouts, reports })
     } catch (error) {
         console.error("History Fetch Error:", error)
         res.status(500).json({ message: "Server Error" })
@@ -39,6 +42,8 @@ const getHistoryDetails = async (req, res) => {
             data = await DietLog.findOne({ _id: id, user: req.user._id })
         } else if (type === 'workout') {
             data = await WorkoutLog.findOne({ _id: id, user: req.user._id })
+        } else if (type === 'report') { // <--- Handle Report Details
+            data = await ReportLog.findOne({ _id: id, user: req.user._id })
         }
 
         if (!data) {

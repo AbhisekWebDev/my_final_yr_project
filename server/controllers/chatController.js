@@ -6,6 +6,9 @@ import { HumanMessage, SystemMessage } from "@langchain/core/messages"
 import MedicineLog from "../models/MedicineLog.js"
 import SymptomLog from "../models/SymptomLog.js"
 
+import HealthLog from "../models/HealthLog.js"
+import ReportLog from "../models/ReportLog.js"
+
 
 // @desc    Get AI Response (Agentic)
 // @route   POST /api/chat
@@ -24,6 +27,72 @@ const getChatResponse = async (req, res) => {
       let systemPrompt = ""
       let userMessage = message
       let mode = "CHAT"
+
+      // ======================================================
+      // REPORT ANALYZER MODE (OCR & Lab Analysis)
+      // ======================================================
+      if (message.startsWith("REPORT_ANALYSIS:")) {
+         mode = "REPORT" // <--- CRITICAL FIX: Set the mode so we can save it later
+         const reportText = message.replace("REPORT_ANALYSIS:", "").trim();
+         
+         // We put the OCR text into the User Message
+         userMessage = reportText;
+
+         // We give a detailed System Prompt to ensure Markdown formatting
+         systemPrompt = `You are an expert Medical Lab Report Analyst.
+         
+         YOUR TASK:
+         Analyze the following unstructured OCR text extracted from a blood test or medical report.
+         Identify specific test names, their values, and the reference ranges (if visible).
+         
+         CRITICAL INSTRUCTIONS:
+         1. **Clean the Data:** OCR text often contains garbage (e.g., "|", "...", random numbers). Ignore these.
+         2. **Identify Abnormalities:** Compare values to standard reference ranges. High/Low values are your priority.
+         3. **Explain:** For every abnormal value, explain what it means in simple English.
+         
+         RESPONSE FORMAT (Strict Markdown):
+         
+         ## 📋 Lab Report Analysis
+         
+         ### 🚨 Abnormal Findings
+         - **[Test Name]**: [Value] [Unit] (Normal: [Range])
+           - *Analysis:* [Simple explanation of what this means. e.g., "High cholesterol indicates risk of heart disease."]
+         
+         ### ✅ Normal Findings
+         - **[Test Name]**: [Value] [Unit]
+         
+         ### 🩺 Doctor's Recommendation
+         - [Actionable advice based on the abnormalities, e.g., "Eat more iron-rich foods", "Consult a cardiologist"]
+         
+         **Disclaimer:** This is an AI interpretation, not a doctor's diagnosis. Always show this report to a real doctor.
+         `;
+      }
+
+      // ======================================================
+      // 1. FETCH HEALTH CONTEXT (THE NEW LOGIC)
+      // ======================================================
+      let healthContext = "No recent health data available.";
+      
+      if (userId) {
+          // Get last 7 days of logs
+          const logs = await HealthLog.find({ user: userId }).sort({ date: -1 }).limit(7);
+          
+          if (logs.length > 0) {
+              // Calculate Averages
+              const avgSteps = Math.round(logs.reduce((acc, log) => acc + log.steps, 0) / logs.length);
+              const avgSleep = (logs.reduce((acc, log) => acc + log.sleep, 0) / logs.length).toFixed(1);
+              const avgHeartRate = Math.round(logs.reduce((acc, log) => acc + log.heartRate, 0) / logs.length);
+              const avgCalories = Math.round(logs.reduce((acc, log) => acc + log.calories, 0) / logs.length);
+
+              healthContext = `
+              PATIENT HEALTH METRICS (Last 7 Days Average):
+              - Daily Steps: ${avgSteps} (Sedentary < 5000, Active > 10000)
+              - Avg Sleep: ${avgSleep} hours/night (Healthy: 7-9 hours)
+              - Avg Heart Rate: ${avgHeartRate} bpm
+              - Daily Burn: ${avgCalories} kcal
+              `;
+          }
+      }
 
       // ======================================================
       // MEDICINE SCANNER (Strict, Factual, Pharmacist)
@@ -113,6 +182,17 @@ const getChatResponse = async (req, res) => {
          mode = "SYMPTOM"
          systemPrompt = // We give the AI a persona and rules
             `You are AIM, an advanced medical AI agent and a helpful medical research assistant. 
+
+            ${healthContext}
+
+            INSTRUCTIONS:
+            1. Use the 'PATIENT HEALTH METRICS' above to refine your diagnosis.
+               - Example: If the patient complains of "Fatigue" and their Sleep is 5 hours, explicitly mention: "Your recent data shows you only average 5 hours of sleep, which is a likely cause."
+               - Example: If they complain of "Weight Gain" and Steps are < 3000, mention their sedentary activity level.
+            
+            2. If the metrics seem normal, focus on the symptoms described.
+
+            3. Behave like a professional Advisor. Provide accurate medical info.
               
             You have access to tools to search the web.
 
@@ -258,10 +338,16 @@ const getChatResponse = async (req, res) => {
                     })
                     console.log("✅ Symptom Saved to DB")
                 }
+            } else if (mode === "REPORT") {
+               // 2. THIS IS THE FIXED PART
+               await ReportLog.create({
+                   user: userId,
+                   ocrText: message.replace("REPORT_ANALYSIS:", "").trim(),
+                   analysis: finalResponse
+               })
+               console.log("✅ Lab Report Saved to DB")
             }
         }
-        else console.log("⚠️ User not logged in - History NOT saved.")
-
       res.json({ reply: finalResponse })
 
    } catch (error) {

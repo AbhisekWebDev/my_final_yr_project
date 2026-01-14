@@ -91,7 +91,7 @@ const HistoryPage = () => {
       ) : (
         <div className="space-y-4">
             
-            {/* SYMPTOMS LIST */}
+            {/* SYMPTOMS LIST and REPORTS LIST */}
             {activeTab === 'symptoms' && (
                 data.symptoms.length > 0 ? (
                     data.symptoms.map((item) => (
